@@ -1,0 +1,20 @@
+<?xml version = "1.0" encoding = "utf-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+    <class name="Model.Bet" table = "bet">
+
+        <id name="id" column="ID">
+            <generator class="increment"></generator>
+        </id>
+
+        <property name="matchId" column="matchID"></property>
+        <property name="matchday" column="matchday"></property>
+        <property name="prediction" column="prediction"></property>
+        <property name="homeTeam" column="home"></property>
+        <property name="awayTeam" column="away"></property>
+
+    </class>
+</hibernate-mapping>

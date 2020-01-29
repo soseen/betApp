@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" fx:controller="Controller.AppController" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="1000" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <left>
+      <VBox prefHeight="700.0" prefWidth="160.0" style="-fx-background-color: #303030; -fx-border-color: #000000;" BorderPane.alignment="CENTER">
+         <children>
+            <Button fx:id="getFixturesButton" mnemonicParsing="false" onAction="#getData" prefHeight="65.0" prefWidth="173.0" style="-fx-background-color: #ffffff; -fx-border-color: #000000;" text="Get Fixtures">
+               <VBox.margin>
+                  <Insets left="15.0" right="15.0" top="10.0" />
+               </VBox.margin>
+            </Button>
+             <ChoiceBox fx:id="chooseLeagueBox"  onAction="#getLeague" prefHeight="65.0" prefWidth="173.0" style="-fx-background-color: #ffffff; -fx-border-color: #000000;">
+                 <VBox.margin>
+                     <Insets left="15.0" right="15.0" top="10.0" />
+                 </VBox.margin>
+             </ChoiceBox>
+         </children>
+      </VBox>
+   </left>
+   <center>
+      <VBox prefHeight="700.0" prefWidth="711.0" style="-fx-background-color: #2E873F;" BorderPane.alignment="CENTER">
+         <children>
+            <TableView fx:id="fixturesTable" maxWidth="-Infinity" prefHeight="370.0" prefWidth="800" style="-fx-background-color: #e4eceb; -fx-border-color: #303030;">
+              <columns>
+                  <TableColumn fx:id="columnId" minWidth="50" prefWidth="50.0" text="ID" />
+                  <TableColumn fx:id="columnMatchweek" minWidth="70" prefWidth="70.0" text="Matchweek" />
+                  <TableColumn fx:id="columnHomeTeam" minWidth="150" prefWidth="180.0" text="Home" />
+                  <TableColumn fx:id="columnAwayTeam" minWidth="150" prefWidth="180.0" text="Away" />
+                  <TableColumn fx:id="columnBet1" minWidth="25" prefWidth="30" />
+                  <TableColumn fx:id="columnBetX" minWidth="25" prefWidth="30"/>
+                  <TableColumn fx:id="columnBet2" minWidth="25" prefWidth="30"/>
+              </columns>
+               <VBox.margin>
+                  <Insets left="20.0" top="10.0" />
+               </VBox.margin>
+            </TableView>
+            <TableView fx:id="betsTable" maxWidth="-Infinity" prefHeight="302.0" prefWidth="800" style="-fx-background-color: #e4eceb; -fx-border-color: #303030;">
+              <columns>
+                <TableColumn fx:id="columnId2" minWidth="50" prefWidth="50.0" text="ID" />
+                  <TableColumn fx:id="columnMatchweek2" minWidth="70" prefWidth="70.0" text="Matchweek" />
+                <TableColumn fx:id="columnPrediction" minWidth="50" prefWidth="70.0" text="Prediction" />
+                  <TableColumn fx:id="columnHomeTeam2" minWidth="150" prefWidth="180" text="Home" />
+                  <TableColumn fx:id="columnAwayTeam2" minWidth="150" prefWidth="180" text="Away" />
+                  <TableColumn fx:id="columnDelete" minWidth="55" prefWidth="60"/>
+                  <TableColumn fx:id="columnEdit" minWidth="55" prefWidth="60" />
+                  <TableColumn fx:id="columnChangePrediction" minWidth="60" prefWidth="70"/>
+              </columns>
+               <VBox.margin>
+                  <Insets left="20.0" top="10.0" />
+               </VBox.margin>
+            </TableView>
+         </children>
+      </VBox>
+   </center>
+</BorderPane>

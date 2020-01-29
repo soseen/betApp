@@ -1,5 +1,7 @@
 package Model;
 
+import Utility.Bet;
+import Utility.Match;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import org.hibernate.Session;
@@ -31,13 +33,21 @@ public class AppModel {
     public static void getFixtures(String leagueID) {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create("https://api.football-data.org/v2/competitions/" + leagueID + "/matches?status=SCHEDULED")).header("X-Auth-Token", API_KEY).build();
-        client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
-                .thenApply(HttpResponse::body)
-                .thenApply(AppModel::parse)
-                .thenAccept(System.out::println)
-                .join();
+
+        try {
+            client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                    .thenApply(HttpResponse::body)
+                    .thenApply(AppModel::parse)
+                    .thenAccept(System.out::println)
+                    .join();
+
+        } catch (Exception e) {
+            System.out.println("Exceeded amount of api calls (10 per minute). Try again later");
+            throw e;
+        }
 
     }
+
 
     public static List<Match> parse(String response){
 
@@ -73,9 +83,14 @@ public class AppModel {
     public List<Bet> getData(){
 
         Session session = sf.openSession();
-        Query qry = session.createQuery("from Bet b");
 
-        betsList = qry.list();
+        try {
+            Query qry = session.createQuery("from Bet b");
+            betsList = qry.list();
+        } catch (Exception e) {
+            throw e;
+        }
+
 
         ChoiceBox changePrediction = new ChoiceBox();
         changePrediction.getItems().addAll("1", "X", "2");
@@ -107,9 +122,18 @@ public class AppModel {
             betsList.add(bet);
             Session session = sf.openSession();
             session.beginTransaction();
-            session.save(bet);
-            session.getTransaction().commit();
-            session.close();
+
+            try {
+                session.save(bet);
+                session.getTransaction().commit();
+                session.close();
+            } catch (Exception e) {
+                session.getTransaction().rollback();
+                throw e;
+            } finally {
+                session.close();
+            }
+
 
     }
 
@@ -122,9 +146,17 @@ public class AppModel {
 
                 Session session = sf.openSession();
                 session.beginTransaction();
-                session.update(betsList.get(i));
-                session.getTransaction().commit();
-                session.close();
+
+                try {
+                    session.update(betsList.get(i));
+                    session.getTransaction().commit();
+                } catch (Exception e) {
+                    session.getTransaction().rollback();
+                    throw e;
+                } finally {
+                    session.close();
+                }
+
             }
         }
     }
@@ -132,11 +164,19 @@ public class AppModel {
     public void deleteBet(int id) {
         for(int i=0; i<betsList.size(); i++){
             if(betsList.get(i).getMatchId() == id){
+
                 Session session = sf.openSession();
                 session.beginTransaction();
-                session.remove(betsList.get(i));
-                session.getTransaction().commit();
-                session.close();
+
+                try {
+                    session.remove(betsList.get(i));
+                    session.getTransaction().commit();
+                } catch (Exception e) {
+                    session.getTransaction().rollback();
+                    throw e;
+                } finally {
+                    session.close();
+                }
                 betsList.remove(betsList.get(i));
             }
         }

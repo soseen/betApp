@@ -1,8 +1,8 @@
 package Controller;
 
-import Model.Bet;
-import Model.Match;
-import Model.League;
+import Utility.Bet;
+import Utility.Match;
+import Utility.League;
 import Model.AppModel;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

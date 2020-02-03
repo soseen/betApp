@@ -1,4 +1,4 @@
-package Model;
+package Util;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;

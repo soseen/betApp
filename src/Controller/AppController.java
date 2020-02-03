@@ -1,12 +1,18 @@
 package Controller;
 
-import Utility.Bet;
-import Utility.Match;
-import Utility.League;
+
+
+import Model.HibernateUtil;
+import Util.Bet;
+import Util.Match;
+import Util.League;
 import Model.AppModel;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -25,6 +31,7 @@ public class AppController implements Initializable {
     public static
 
     AppModel model = new AppModel();
+
 
     ObservableList<Match> fixturesData;
     ObservableList<Bet> bets;
@@ -88,7 +95,6 @@ public class AppController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-
         loadLeagues();
         initializeTables();
     }
@@ -128,8 +134,23 @@ public class AppController implements Initializable {
         columnEdit.setCellValueFactory(new PropertyValueFactory<Bet, Button>("buttonEdit"));
         columnChangePrediction.setCellValueFactory(new PropertyValueFactory<Bet, ChoiceBox>("changePrediction"));
 
-        betsData = model.getData();
-        displayBets();
+        betsData = getCurrentBets();
+    }
+
+    private void displayBets(){
+
+        bets = FXCollections.observableList(betsData);
+        betsTable.getItems().removeAll();
+        betsTable.setItems(bets);
+        betsTable.refresh();
+
+
+        for(int z=0; z < betsData.size(); z++) {
+            betsData.get(z).getButtonEdit().setOnAction(this::editOrDeleteBet);
+            betsData.get(z).getButtonRemove().setOnAction(this::editOrDeleteBet);
+        }
+
+
     }
 
     @FXML
@@ -144,12 +165,13 @@ public class AppController implements Initializable {
 
 
         for (int i = 0; i < fixturesData.size(); i++) {
-            fixturesData.get(i).getButton1().setOnAction(this::placeBet);
-            fixturesData.get(i).getButtonX().setOnAction(this::placeBet);
-            fixturesData.get(i).getButton2().setOnAction(this::placeBet);
+            fixturesData.get(i).getButton1().setOnAction(this::placePrediction);
+            fixturesData.get(i).getButtonX().setOnAction(this::placePrediction);
+            fixturesData.get(i).getButton2().setOnAction(this::placePrediction);
         }
 
         fixturesTable.setItems(fixturesData);
+        displayBets();
 
         return fixturesData;
     }
@@ -165,54 +187,172 @@ public class AppController implements Initializable {
         System.out.println(leagueID);
     }
 
-    private void placeBet(ActionEvent actionEvent) {
-
+    private void placePrediction(ActionEvent actionEvent) {
 
         String prediction;
 
         for (int i = 0; i < fixturesData.size(); i++) {
             if (actionEvent.getSource() == fixturesData.get(i).getButton1()) {
                 prediction = "1";
-                model.placeBet(prediction, i);
+                placeBet(prediction, i);
             } else if (actionEvent.getSource() == fixturesData.get(i).getButtonX()) {
                 prediction = "X";
-                model.placeBet(prediction, i);
+                placeBet(prediction, i);
             } else if (actionEvent.getSource() == fixturesData.get(i).getButton2()) {
                 prediction = "2";
-                model.placeBet(prediction, i);
+                placeBet(prediction, i);
             }
         }
 
         displayBets();
 
     }
-    private void displayBets(){
+
+    public List<Bet> getCurrentBets(){
+        Task <List<Bet>> getData = new Task<List<Bet>>() {
+
+            @Override
+            protected List<Bet> call() throws Exception {
+                return HibernateUtil.getData();
+            }
+        };
 
 
-        betsData = model.getBetsList();
-        bets = FXCollections.observableList(betsData);
-        betsTable.getItems().removeAll();
-        betsTable.setItems(bets);
-        betsTable.refresh();
+        getData.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+            @Override
+            public void handle(WorkerStateEvent event) {
+                betsData = getData.getValue();
+                ChoiceBox changePrediction = new ChoiceBox();
+                changePrediction.getItems().addAll("1", "X", "2");
 
-        for(int z=0; z < betsData.size(); z++) {
-            betsData.get(z).getButtonEdit().setOnAction(this::editOrDeleteBet);
-            betsData.get(z).getButtonRemove().setOnAction(this::editOrDeleteBet);
-        }
+                for(int i=0; i<betsData.size(); i++){
+                    betsData.get(i).setButtonEdit(new Button("Edit"));
+                    betsData.get(i).setButtonRemove(new Button("Delete"));
+                    betsData.get(i).setChangePreditcion(new ChoiceBox());
+                }
+                displayBets();
+            }
+        });
 
+        new Thread(getData).start();
+
+
+        return betsData;
     }
+
+
 
     private void editOrDeleteBet(ActionEvent actionEvent) {
         for(int i=0; i<betsData.size(); i++)
             if (actionEvent.getSource() == betsData.get(i).getButtonRemove()) {
-                model.deleteBet(betsData.get(i).getMatchId());
+                deleteBet(betsData.get(i).getMatchId());
             } else if (actionEvent.getSource() == betsData.get(i).getButtonEdit()) {
                 if(betsData.get(i).getChangePrediction().getValue() != null){
-                    model.editBet(betsData.get(i).getMatchId(), (String) betsData.get(i).getChangePrediction().getValue());
+                    editBet(betsData.get(i).getMatchId(), (String) betsData.get(i).getChangePrediction().getValue());
                 }
             }
 
         displayBets();
+    }
+
+    public void placeBet(String prediction, int i) {
+
+        Task <Bet> placeBet = new Task <Bet>() {
+
+            @Override
+            protected Bet call() throws Exception {
+                if(fixturesData.size() > 0){
+                    for(int z=0; z < betsData.size(); z++){
+                        if(betsData.get(z).getMatchId() == fixturesData.get(i).getMatchId()){
+                            return null;
+                        }
+                    }
+                }
+
+                ChoiceBox changePrediction = new ChoiceBox();
+                changePrediction.getItems().addAll("1", "X", "2");
+                Bet bet = new Bet(fixturesData.get(i).getMatchId(), fixturesData.get(i).getMatchday(), prediction, fixturesData.get(i).getHomeTeam(), fixturesData.get(i).getAwayTeam(), new Button("Edit"), new Button("Delete"), changePrediction);
+                betsData.add(bet);
+
+                return bet;
+            }
+        };
+
+        placeBet.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+            @Override
+            public void handle(WorkerStateEvent event) {
+
+                if(placeBet.getValue() != null){
+                    Bet bet = placeBet.getValue();
+                    HibernateUtil.placeBet(bet);
+                }
+                displayBets();
+            }
+        });
+
+        new Thread(placeBet).start();
+
+    }
+
+
+    public void editBet(int id, String newPrediction) {
+
+        Task<List<Bet>> editBet = new Task<List<Bet>>() {
+
+            @Override
+            protected List<Bet> call() throws Exception {
+                for (int i = 0; i < betsData.size(); i++) {
+                    if (betsData.get(i).getMatchId() == id && betsData.get(i).getPrediction() != newPrediction) {
+                        betsData.get(i).setPrediction(newPrediction);
+
+                        HibernateUtil.editBet(betsData.get(i));
+
+
+                    }
+                }
+
+                return betsData;
+            }
+
+        };
+
+        editBet.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+            @Override
+            public void handle(WorkerStateEvent event) {
+                displayBets();
+            }
+        });
+
+        new Thread(editBet).start();
+
+    }
+
+    public void deleteBet(int id) {
+
+        Task<List<Bet>> deleteBet = new Task<List<Bet>>() {
+
+            @Override
+            protected List<Bet> call() throws Exception {
+                for(int i=0; i<betsData.size(); i++){
+                    if(betsData.get(i).getMatchId() == id){
+
+                        HibernateUtil.deleteBet(betsData.get(i));
+                        betsData.remove(betsData.get(i));
+                    }
+                };
+                return betsData;
+            }
+
+        };
+
+        deleteBet.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+            @Override
+            public void handle(WorkerStateEvent event) {
+                displayBets();
+            }
+        });
+
+        new Thread(deleteBet).start();
     }
 
 

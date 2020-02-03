@@ -1,6 +1,4 @@
-package Model;
-
-import javafx.scene.control.Button;
+package Util;
 
 public class League {
 

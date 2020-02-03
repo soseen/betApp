@@ -1,4 +1,4 @@
-package Utility;
+package Util;
 
 import javafx.scene.control.Button;
 

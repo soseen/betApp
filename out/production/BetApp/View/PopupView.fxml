@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.image.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+
+<VBox fx:id="popupWindow" alignment="TOP_CENTER" fx:controller="Controller.PopupController" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #2E873F;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Betting Application" textAlignment="CENTER" wrappingWidth="602.13671875">
+         <font>
+            <Font size="40.0" />
+         </font>
+         <VBox.margin>
+            <Insets top="30.0" />
+         </VBox.margin>
+      </Text>
+      <ImageView fx:id="ballImageView" fitHeight="150.0" fitWidth="178.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../img/ball.png"/>
+         </image>
+         <VBox.margin>
+            <Insets top="30.0" />
+         </VBox.margin>
+      </ImageView>
+      <Button onAction="#initApp" mnemonicParsing="false" prefHeight="70.0" prefWidth="140.0" text="Connect" textAlignment="CENTER">
+         <VBox.margin>
+            <Insets top="40.0" />
+         </VBox.margin>
+         <font>
+            <Font size="20.0" />
+         </font>
+      </Button>
+   </children>
+</VBox>
